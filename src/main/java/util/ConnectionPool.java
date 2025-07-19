@@ -1,7 +1,5 @@
 package util;
 
-//todo полный рефракторинг класса
-import java.io.IOException;
 import java.lang.reflect.Proxy;
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -10,32 +8,33 @@ import java.util.*;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 
+/*
+После использования необходимо закрывать все соединения, вызывая terminate().
+ */
 public class ConnectionPool {
-    private static final Properties PROPERTIES = new Properties();
+    private static BlockingQueue<Connection> modifiedConnections;
+    private static List<Connection> commonConnections;
     private static final String POOL_SIZE_KEY = "db.pool.size";
-    private static BlockingQueue<Connection> connections;
-    private static final ConnectionOpener connectionOpener = new ConnectionOpener();
     private static final int DEFAULT_POOL_SIZE = 5;
-    private List<Connection> realConnection;
 
     public ConnectionPool() {
-        String poolSize = PROPERTIES.getProperty(POOL_SIZE_KEY);
-        int size = poolSize == null ? DEFAULT_POOL_SIZE : Integer.parseInt(poolSize);
-        connections = new ArrayBlockingQueue<>(size);
-        realConnection = new ArrayList<>(size);
+        int size = getSize();
+        modifiedConnections = new ArrayBlockingQueue<>(size);
+        commonConnections = new ArrayList<>(size);
         addConnections(size);
     }
 
+
     public Connection get() {
         try {
-            return connections.take();
+            return modifiedConnections.take();
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }
     }
 
     public void terminate() {
-        realConnection.forEach(c-> {
+        commonConnections.forEach(c -> {
             try {
                 c.close();
             } catch (SQLException e) {
@@ -43,28 +42,27 @@ public class ConnectionPool {
             }
         });
     }
-
-    public static void main(String[] args) throws SQLException {
-        ConnectionPool connectionPool = new ConnectionPool();
-        Connection connection = connectionPool.get();
-        connection.close();
-        connectionPool.terminate();
+    private int getSize() {
+        String poolSize = AppProperties.get(POOL_SIZE_KEY);
+        return poolSize == null ? DEFAULT_POOL_SIZE : Integer.parseInt(poolSize);
     }
 
+    //Добавляются специальные соединения, у которых вызов close() возвращает соединения на место, а не закрывает его.
     private void addConnections(int count) {
+        ConnectionOpener opener = new ConnectionOpener();
         for (int i = 0; i < count; i++) {
-            Connection connection = connectionOpener.open();
-           Connection connection2 = (Connection) Proxy.newProxyInstance(ConnectionPool.class.getClassLoader(),new Class[]{Connection.class},(proxy, method, args) -> {
+            Connection connection = opener.open();
+            Connection proxyConnection = (Connection) Proxy.newProxyInstance(ConnectionPool.class.getClassLoader(), new Class[]{Connection.class}, (proxy, method, args) -> {
                 if (method.getName().equals("close")) {
                     System.out.println("Вернули ");
-                    connections.add((Connection) proxy);
+                    modifiedConnections.add((Connection) proxy);
                 } else {
                     method.invoke(connection, args);
                 }
-           return proxy;
-           });
-            realConnection.add(connection);
-            connections.add(connection2);
+                return proxy;
+            });
+            commonConnections.add(connection);
+            modifiedConnections.add(proxyConnection);
         }
     }
 
@@ -74,29 +72,25 @@ public class ConnectionPool {
         private static final String PASSWORD_KEY = "db.password";
         private static final String DRIVER_KEY = "db.driver";
 
-        public ConnectionOpener() {
-            load();
+        static {
+            try {
+                Class.forName(AppProperties.get(DRIVER_KEY));
+            } catch (ClassNotFoundException e) {
+                throw new RuntimeException(e);
+            }
         }
 
         public Connection open() {
             try {
                 return DriverManager.getConnection(
-                        PROPERTIES.getProperty(URL_KEY),
-                        PROPERTIES.getProperty(USER_KEY),
-                        PROPERTIES.getProperty(PASSWORD_KEY)
+                        AppProperties.get(URL_KEY),
+                        AppProperties.get(USER_KEY),
+                        AppProperties.get(PASSWORD_KEY)
                 );
             } catch (SQLException e) {
                 throw new RuntimeException(e);
             }
         }
 
-        private void load() {
-            try {
-                PROPERTIES.load(ConnectionManager.class.getClassLoader().getResourceAsStream("application.properties"));
-                Class.forName(PROPERTIES.getProperty(DRIVER_KEY));
-            } catch (IOException | ClassNotFoundException e) {
-                throw new RuntimeException(e);
-            }
-        }
     }
 }
