@@ -15,25 +15,25 @@ import java.util.Optional;
 public class UserDao implements Dao<Integer, User> {
 
     private static final String SAVE_SQL = """
-            INSERT INTO todo.users.users(login, password)
+            INSERT INTO task_tracker.users.user(login, password)
             VALUES (?,?)
             RETURNING id;
             """;
 
     private static final String GET_ALL_SQL = """
             SELECT id, login, password
-            FROM todo.users.users
+            FROM task_tracker.users.user
             """;
 
     private static final String GET_BY_ID_SQL = GET_ALL_SQL + " WHERE id = ?";
 
     private static final String DELETE_SQL = """
-            DELETE FROM todo.users.users
+            DELETE FROM task_tracker.users.user
             WHERE id = ?;
             """;
 
     private static final String UPDATE_SQL = """
-            UPDATE todo.users.users
+            UPDATE task_tracker.users.user
             SET login = ?, password = ?
             WHERE id = ?;
             """;

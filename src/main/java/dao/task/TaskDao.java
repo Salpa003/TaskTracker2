@@ -15,31 +15,31 @@ import java.util.Optional;
 public class TaskDao implements Dao<Long, Task> {
 
     private static final String SAVE_SQL = """
-            INSERT INTO todo.tasks.tasks(name, description, status, duration, start_time, end_time, user_id)
+            INSERT INTO task_tracker.tasks.task(name, description, status, duration, start_time, end_time, user_id)
             VALUES (?,?,?,?,?,?,?)
             RETURNING id;
             """;
 
     private static final String DELETE_SQL = """
-            DELETE FROM todo.tasks.tasks
+            DELETE FROM task_tracker.tasks.task
             WHERE id = ?;
             """;
 
     private static final String GET_ALL_BY_USER_ID_SQL = """
             SELECT id, name, description, status, duration, start_time, end_time, user_id
-            FROM todo.tasks.tasks
+            FROM task_tracker.tasks.task
             WHERE user_id = ?
             """;
 
     private static final String GET_ALL_SQL = """
-             SELECT id, name, description, status, duration, start_time, end_time, user_id
-            FROM todo.tasks.tasks
+            SELECT id, name, description, status, duration, start_time, end_time, user_id
+            FROM task_tracker.tasks.task
             """;
 
     private static final String GET_BY_ID_SQL = GET_ALL_SQL + " WHERE id = ?";
 
     private static final String UPDATE_SQL = """
-            UPDATE todo.tasks.tasks
+            UPDATE task_tracker.tasks.task
             set name = ?, description = ?, status = ?, duration = ?,
             start_time = ?, end_time = ?
             WHERE id = ?;

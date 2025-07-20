@@ -6,3 +6,25 @@ CREATE DATABASE task_tracker;
 --Part 2
 CREATE SCHEMA tasks;
 CREATE SCHEMA users;
+
+CREATE TABLE users.user
+(
+    id       SERIAL PRIMARY KEY,
+    login    VARCHAR NOT NULL,
+    password VARCHAR not null
+);
+
+CREATE TABLE tasks.task
+(
+    id          BIGSERIAL PRIMARY KEY,
+    name        VARCHAR     NOT NULL,
+    description VARCHAR     NOT NULL,
+    status      VARCHAR(20) NOT NULL,
+    duration    BIGINT      NOT NULL,
+    start_time  TIMESTAMP   NOT NULL,
+    end_time    TIMESTAMP   NOT NULL,
+    user_id     INTEGER REFERENCES users.user (id)
+);
+
+
+

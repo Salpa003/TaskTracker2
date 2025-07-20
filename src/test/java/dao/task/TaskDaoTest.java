@@ -5,6 +5,7 @@ import entity.task.Task;
 import entity.task.TaskStatus;
 import entity.user.User;
 import org.junit.jupiter.api.*;
+import util.ConnectionManager;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
@@ -122,6 +123,7 @@ public class TaskDaoTest {
     void removeUser() {
         UserDao userDao = UserDao.getINSTANCE();
         userDao.delete(userId);
+        ConnectionManager.terminate();
     }
 
 }

@@ -52,15 +52,18 @@ public class ConnectionPool {
         ConnectionOpener opener = new ConnectionOpener();
         for (int i = 0; i < count; i++) {
             Connection connection = opener.open();
-            Connection proxyConnection = (Connection) Proxy.newProxyInstance(ConnectionPool.class.getClassLoader(), new Class[]{Connection.class}, (proxy, method, args) -> {
-                if (method.getName().equals("close")) {
-                    System.out.println("Вернули ");
-                    modifiedConnections.add((Connection) proxy);
-                } else {
-                    method.invoke(connection, args);
-                }
-                return proxy;
-            });
+            Connection proxyConnection = (Connection) Proxy.newProxyInstance(
+                    ConnectionPool.class.getClassLoader(),
+                    new Class[]{Connection.class},
+                    (proxy, method, args) -> {
+                        if (method.getName().equals("close")) {
+                            modifiedConnections.add((Connection) proxy);
+                            return null;
+                        } else {
+                            return method.invoke(connection, args);
+                        }
+                    }
+            );
             commonConnections.add(connection);
             modifiedConnections.add(proxyConnection);
         }
