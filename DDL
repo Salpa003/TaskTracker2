@@ -1,0 +1,8 @@
+--PostgreSQL
+--Do not run the entire file, first part 1, then part 2.
+--Part 1
+CREATE DATABASE task_tracker;
+--Connection to any schema of task_tracker
+--Part 2
+CREATE SCHEMA tasks;
+CREATE SCHEMA users;
