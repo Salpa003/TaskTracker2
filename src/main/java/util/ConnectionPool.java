@@ -34,6 +34,7 @@ public class ConnectionPool {
     }
 
     public void terminate() {
+        System.out.println("Terminate+");
         commonConnections.forEach(c -> {
             try {
                 c.close();

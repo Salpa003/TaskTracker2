@@ -17,6 +17,7 @@ import static org.assertj.core.api.Assertions.*;
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public class TaskDaoTest {
 
+    //todo Создать и применять список зарезервированых уникальных имён для тестов TaskDao, UserDao
     private TaskDao dao = TaskDao.getInstance();
     private int userId;
 

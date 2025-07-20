@@ -14,7 +14,7 @@ public final class ConnectionManager {
     // сравнить разницу с пулом и без
     public static Connection open() {
         int a = 1;//2
-        if (a == 1) {
+        if (a == 2) {
             try {
                 return DriverManager.getConnection(
                         AppProperties.get("db.url"),
@@ -29,7 +29,7 @@ public final class ConnectionManager {
     }
 
     public static void terminate() {
-        System.out.println("Terminate");
+        System.out.println("Terminate-");
         pool.terminate();
     }
 
