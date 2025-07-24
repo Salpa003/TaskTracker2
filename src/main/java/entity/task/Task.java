@@ -120,6 +120,6 @@ public class Task {
 
     @Override
     public String toString() {
-        return id +" | " + name + " | " + duration + " | " + userId + " userid |";
+        return id + " | " + name + " | " + duration + " | " + userId + " userid |";
     }
 }

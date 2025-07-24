@@ -1,7 +1,7 @@
 package dao.user;
 
-import dao.Dao;
 import entity.user.User;
+import exceptions.user.UserAlreadyExists;
 import util.ConnectionManager;
 
 import java.sql.Connection;
@@ -12,7 +12,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-public class UserDao implements Dao<Integer, User> {
+public class UserDao {
 
     private static final String SAVE_SQL = """
             INSERT INTO task_tracker.users.user(login, password)
@@ -37,6 +37,17 @@ public class UserDao implements Dao<Integer, User> {
             SET login = ?, password = ?
             WHERE id = ?;
             """;
+
+    private static final String FIND_BY_LOGIN = """
+            SELECT id
+            FROM task_tracker.users."user"
+            WHERE login = ?;
+            """;
+    private static final String FIND_BY_LOGIN_AND_PASSWORD = """
+            SELECT id
+            FROM task_tracker.users."user"
+            WHERE login = ? AND password = ?;
+            """;
     private static final UserDao INSTANCE = new UserDao();
 
     private UserDao() {
@@ -47,8 +58,8 @@ public class UserDao implements Dao<Integer, User> {
         return INSTANCE;
     }
 
-    @Override
-    public boolean save(User user) {
+
+    public boolean save(User user) throws UserAlreadyExists {
         try (Connection connection = ConnectionManager.open();
              PreparedStatement preparedStatement = connection.prepareStatement(SAVE_SQL)) {
             preparedStatement.setString(1, user.getLogin());
@@ -61,11 +72,14 @@ public class UserDao implements Dao<Integer, User> {
             }
             return false;
         } catch (SQLException e) {
-            throw new RuntimeException(e);
+            if (e.getMessage().contains("ОШИБКА: повторяющееся значение ключа нарушает ограничение уникальности")) {
+                throw new UserAlreadyExists(user.getLogin());
+            } else {
+                throw new RuntimeException(e);
+            }
         }
     }
 
-    @Override
     public boolean delete(Integer id) {
         try (Connection connection = ConnectionManager.open();
              PreparedStatement preparedStatement = connection.prepareStatement(DELETE_SQL)) {
@@ -78,22 +92,20 @@ public class UserDao implements Dao<Integer, User> {
         }
     }
 
-    @Override
     public boolean update(User user) {
         try (Connection connection = ConnectionManager.open();
              PreparedStatement preparedStatement = connection.prepareStatement(UPDATE_SQL)) {
-                preparedStatement.setString(1,user.getLogin());
-                preparedStatement.setString(2, user.getPassword());
-                preparedStatement.setInt(3, user.getId());
+            preparedStatement.setString(1, user.getLogin());
+            preparedStatement.setString(2, user.getPassword());
+            preparedStatement.setInt(3, user.getId());
 
-                int update = preparedStatement.executeUpdate();
-                return update > 0;
+            int update = preparedStatement.executeUpdate();
+            return update > 0;
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
     }
 
-    @Override
     public Optional<User> get(Integer id) {
         try (Connection connection = ConnectionManager.open();
              PreparedStatement preparedStatement = connection.prepareStatement(GET_BY_ID_SQL)) {
@@ -109,19 +121,42 @@ public class UserDao implements Dao<Integer, User> {
         return Optional.empty();
     }
 
-    @Override
+
     public List<User> getAll() {
         List<User> users = new ArrayList<>();
         try (Connection connection = ConnectionManager.open();
              PreparedStatement preparedStatement = connection.prepareStatement(GET_ALL_SQL)) {
-           ResultSet resultSet = preparedStatement.executeQuery();
-           while (resultSet.next()) {
-               users.add(resultSetToEntity(resultSet));
-           }
+            ResultSet resultSet = preparedStatement.executeQuery();
+            while (resultSet.next()) {
+                users.add(resultSetToEntity(resultSet));
+            }
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
         return users;
+    }
+
+    public boolean findByLogin(String login) {
+        try (Connection connection = ConnectionManager.open();
+             PreparedStatement preparedStatement = connection.prepareStatement(FIND_BY_LOGIN)) {
+            preparedStatement.setString(1, login);
+            ResultSet resultSet = preparedStatement.executeQuery();
+            return resultSet.next();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public boolean findByLoginAndPassword(String login, String password) {
+        try (Connection connection = ConnectionManager.open();
+             PreparedStatement preparedStatement = connection.prepareStatement(FIND_BY_LOGIN_AND_PASSWORD)) {
+            preparedStatement.setString(1, login);
+            preparedStatement.setString(2, password);
+            ResultSet resultSet = preparedStatement.executeQuery();
+            return resultSet.next();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     private User resultSetToEntity(ResultSet resultSet) {

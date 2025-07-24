@@ -1,8 +1,5 @@
 package entity.task;
 
-import entity.task.Epic;
-import entity.task.Subtask;
-import entity.task.TaskStatus;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
@@ -21,8 +18,8 @@ public class EpicTest {
 
     @Test
     void shouldCalculateStatus() {
-        Subtask subtask1 = new Subtask(1,null,null, TaskStatus.NEW,null,null,null,1);
-        Subtask subtask2 = new Subtask(2,null,null,TaskStatus.NEW,null,null,null,1);
+        Subtask subtask1 = new Subtask(1, null, null, TaskStatus.NEW, null, null, null, 1);
+        Subtask subtask2 = new Subtask(2, null, null, TaskStatus.NEW, null, null, null, 1);
         epic.addSubtask(subtask1);
         epic.addSubtask(subtask2);
 

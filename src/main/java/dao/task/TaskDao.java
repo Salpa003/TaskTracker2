@@ -1,6 +1,5 @@
 package dao.task;
 
-import dao.Dao;
 import entity.task.Task;
 import entity.task.TaskStatus;
 import util.ConnectionManager;
@@ -12,7 +11,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-public class TaskDao implements Dao<Long, Task> {
+public class TaskDao {
 
     private static final String SAVE_SQL = """
             INSERT INTO task_tracker.tasks.task(name, description, status, duration, start_time, end_time, user_id)
@@ -54,7 +53,7 @@ public class TaskDao implements Dao<Long, Task> {
         return INSTANCE;
     }
 
-    @Override
+
     public boolean save(Task task) {
         try (Connection connection = ConnectionManager.open();
              PreparedStatement preparedStatement = connection.prepareStatement(SAVE_SQL)) {
@@ -66,7 +65,7 @@ public class TaskDao implements Dao<Long, Task> {
             preparedStatement.setTimestamp(6, Timestamp.valueOf(TimeFormatter.timestamp(task.getEndTime())));
             preparedStatement.setInt(7, task.getUserId());
 
-            ResultSet resultSet  = preparedStatement.executeQuery();
+            ResultSet resultSet = preparedStatement.executeQuery();
             if (resultSet.next()) {
                 task.setId(resultSet.getLong("id"));
                 return true;
@@ -77,7 +76,7 @@ public class TaskDao implements Dao<Long, Task> {
         }
     }
 
-    @Override
+
     public boolean delete(Long id) {
         try (Connection connection = ConnectionManager.open();
              PreparedStatement preparedStatement = connection.prepareStatement(DELETE_SQL)) {
@@ -89,7 +88,7 @@ public class TaskDao implements Dao<Long, Task> {
         }
     }
 
-    @Override
+
     public boolean update(Task task) {
         try (Connection connection = ConnectionManager.open();
              PreparedStatement preparedStatement = connection.prepareStatement(UPDATE_SQL)) {
@@ -108,7 +107,7 @@ public class TaskDao implements Dao<Long, Task> {
         }
     }
 
-    @Override
+
     public Optional<Task> get(Long id) {
         try (Connection connection = ConnectionManager.open();
              PreparedStatement preparedStatement = connection.prepareStatement(GET_BY_ID_SQL)) {
@@ -138,7 +137,7 @@ public class TaskDao implements Dao<Long, Task> {
         }
     }
 
-    @Override
+
     public List<Task> getAll() {
         List<Task> list = new ArrayList<>();
         try (Connection connection = ConnectionManager.open();

@@ -40,9 +40,9 @@ public class Epic extends Task {
         boolean isDone = true;
 
         for (Subtask subtask : subtasks) {
-            if (subtask.getStatus()!=TaskStatus.NEW)
+            if (subtask.getStatus() != TaskStatus.NEW)
                 isNew = false;
-            if (subtask.getStatus()!=TaskStatus.DONE)
+            if (subtask.getStatus() != TaskStatus.DONE)
                 isDone = false;
         }
         if (isNew)

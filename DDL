@@ -26,6 +26,4 @@ CREATE TABLE tasks.task
     user_id     INTEGER REFERENCES users.user (id)
 );
 
-//todo создать Индексы (с умом)
-
 
