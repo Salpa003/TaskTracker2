@@ -13,7 +13,7 @@ public class UserService {
 
     private final UserDao userDao = UserDao.getINSTANCE();
 
-    private final List<String> testLogins = Arrays.asList("test", "test2");
+    private final List<String> testLogins = Arrays.asList("testUser1","testUser2");
     private boolean isTest = false;
 
     public boolean createUser(User user) throws UserAlreadyExists {

@@ -8,9 +8,6 @@ import java.util.*;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 
-/*
-После использования необходимо закрывать все соединения, вызывая terminate().
- */
 public class ConnectionPool {
     private static BlockingQueue<Connection> modifiedConnections;
     private static List<Connection> commonConnections;
@@ -33,7 +30,7 @@ public class ConnectionPool {
         }
     }
 
-    public void terminate() {
+    public static void terminate() {
         commonConnections.forEach(c -> {
             try {
                 c.close();

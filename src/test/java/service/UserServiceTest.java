@@ -5,7 +5,7 @@ import exceptions.user.IncorrectPassword;
 import exceptions.user.UserAlreadyExists;
 import exceptions.user.UserNotFound;
 import org.junit.jupiter.api.*;
-import util.ConnectionManager;
+import util.ConnectionPoolAdapter;
 
 import static org.assertj.core.api.Assertions.*;
 
@@ -18,12 +18,18 @@ public class UserServiceTest {
     private User user;
 
     @BeforeAll
-    void setService() {
+    void setFields() {
         service = new UserService();
         service.testStart();
 
-        user = new User("test", "123");
-        existUser = new User("Rusik", "123");
+        user = new User("testUser1", "123");
+        existUser = new User("testUser2", "123");
+
+        try {
+            service.createUser(existUser);
+        } catch (UserAlreadyExists e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Test
@@ -71,6 +77,7 @@ public class UserServiceTest {
 
     @AfterAll
     void closeConnectionPool() {
-        ConnectionManager.terminate();
+        service.deleteUser(existUser);
+        ConnectionPoolAdapter.terminate();
     }
 }
