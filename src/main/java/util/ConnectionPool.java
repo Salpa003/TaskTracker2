@@ -9,10 +9,10 @@ import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 
 public class ConnectionPool {
-    private static BlockingQueue<Connection> modifiedConnections;
-    private static List<Connection> commonConnections;
+    private  BlockingQueue<Connection> modifiedConnections;
+    private  List<Connection> commonConnections;
     private static final String POOL_SIZE_KEY = "db.pool.size";
-    private static final int DEFAULT_POOL_SIZE = 5;
+    private  final int DEFAULT_POOL_SIZE = 5;
 
     public ConnectionPool() {
         int size = getSize();
@@ -30,7 +30,7 @@ public class ConnectionPool {
         }
     }
 
-    public static void terminate() {
+    public  void terminate() {
         commonConnections.forEach(c -> {
             try {
                 c.close();

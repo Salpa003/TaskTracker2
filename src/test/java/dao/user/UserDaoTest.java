@@ -12,7 +12,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public class UserDaoTest {
-
+    private ConnectionPoolAdapter poolAdapter;
     private UserDao userDao;
 
     private User user;
@@ -21,15 +21,14 @@ public class UserDaoTest {
     void setFields() {
         userDao = UserDao.getINSTANCE();
         user = new User("testUser1", "testUser");
+        poolAdapter = new ConnectionPoolAdapter();
+        poolAdapter.init();
     }
 
     @Test
     void save() {
-        try {
-            userDao.save(user);
-        } catch (UserAlreadyExists e) {
-            throw new RuntimeException("Error in creating user");
-        }
+        saveWithoutException(user);
+
         Optional<User> maybeUser = userDao.get(user.getId());
         assertThat(maybeUser).isPresent();
         assertThat(maybeUser.get()).isEqualTo(user);
@@ -37,11 +36,7 @@ public class UserDaoTest {
 
     @Test
     void delete() {
-        try {
-            userDao.save(user);
-        } catch (UserAlreadyExists e) {
-            throw new RuntimeException("Error in creating user");
-        }
+        saveWithoutException(user);
 
         boolean delete = userDao.delete(user.getId());
         assertThat(delete).isTrue();
@@ -52,11 +47,7 @@ public class UserDaoTest {
 
     @Test
     void update() {
-        try {
-            userDao.save(user);
-        } catch (UserAlreadyExists e) {
-            throw new RuntimeException("Error in creating user");
-        }
+        saveWithoutException(user);
 
         String newLogin = "CoCoCo";
         user.setLogin(newLogin);
@@ -76,7 +67,15 @@ public class UserDaoTest {
 
     @AfterAll
     void closeConnection() {
-        ConnectionPoolAdapter.terminate();
+        poolAdapter.terminate();
+    }
+
+    void saveWithoutException(User user) {
+        try {
+            userDao.save(user);
+        } catch (UserAlreadyExists e) {
+            throw new RuntimeException("Error in creating user");
+        }
     }
 
 

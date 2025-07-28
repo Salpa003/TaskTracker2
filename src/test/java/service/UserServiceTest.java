@@ -12,6 +12,7 @@ import static org.assertj.core.api.Assertions.*;
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public class UserServiceTest {
 
+    private ConnectionPoolAdapter poolAdapter;
     private UserService service;
 
     private User existUser;
@@ -20,16 +21,10 @@ public class UserServiceTest {
     @BeforeAll
     void setFields() {
         service = new UserService();
-        service.testStart();
-
-        user = new User("testUser1", "123");
-        existUser = new User("testUser2", "123");
-
-        try {
-            service.createUser(existUser);
-        } catch (UserAlreadyExists e) {
-            throw new RuntimeException(e);
-        }
+        service.testStart();// Игнорировать Зареверсированные имена (testUser)
+        createUsersForTests();
+        poolAdapter = new ConnectionPoolAdapter();
+        poolAdapter.init();
     }
 
     @Test
@@ -78,6 +73,17 @@ public class UserServiceTest {
     @AfterAll
     void closeConnectionPool() {
         service.deleteUser(existUser);
-        ConnectionPoolAdapter.terminate();
+        poolAdapter.terminate();
+    }
+
+    private void createUsersForTests() {
+        user = new User("testUser1", "123");
+        existUser = new User("testUser2", "123");
+
+        try {
+            service.createUser(existUser);
+        } catch (UserAlreadyExists e) {
+            throw new RuntimeException(e);
+        }
     }
 }

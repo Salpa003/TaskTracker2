@@ -2,7 +2,13 @@ package util;
 
 public class ConnectionPoolAdapter {
 
-    public static void terminate() {
-        ConnectionManager.terminate();
+    private ConnectionPool pool;
+
+   public void init() {
+       pool = new ConnectionPool();
+   }
+
+    public  void terminate() {
+       pool.terminate();
     }
 }
