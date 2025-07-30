@@ -6,7 +6,6 @@ import entity.task.TaskStatus;
 import entity.user.User;
 import exceptions.user.UserAlreadyExists;
 import org.junit.jupiter.api.*;
-import util.ConnectionPoolAdapter;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
@@ -18,8 +17,6 @@ import static org.assertj.core.api.Assertions.*;
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public class TaskDaoTest {
     private TaskDao dao;
-
-    private ConnectionPoolAdapter poolAdapter;
     private int userId;
 
     private Task task;
@@ -31,8 +28,6 @@ public class TaskDaoTest {
                 LocalDateTime.of(2025, 1, 1, 1, 1, 1),
                 LocalDateTime.of(2025, 2, 1, 1, 1, 1), userId);
         dao = TaskDao.getInstance();
-        poolAdapter = new ConnectionPoolAdapter();
-        poolAdapter.init();
     }
 
     @Test
@@ -107,7 +102,6 @@ public class TaskDaoTest {
     @AfterAll
     void cleanFields() {
         deleteUser(userId);
-        poolAdapter.terminate();
     }
 
     private Integer createUser() {

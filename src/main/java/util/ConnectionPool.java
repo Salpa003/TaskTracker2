@@ -38,7 +38,9 @@ public class ConnectionPool {
                 throw new RuntimeException(e);
             }
         });
+        System.out.println("Terminate");
     }
+
 
     private int getSize() {
         String poolSize = AppProperties.get(POOL_SIZE_KEY);

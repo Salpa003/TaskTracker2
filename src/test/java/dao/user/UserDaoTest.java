@@ -3,7 +3,6 @@ package dao.user;
 import entity.user.User;
 import exceptions.user.UserAlreadyExists;
 import org.junit.jupiter.api.*;
-import util.ConnectionPoolAdapter;
 
 import java.util.Optional;
 
@@ -12,7 +11,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public class UserDaoTest {
-    private ConnectionPoolAdapter poolAdapter;
     private UserDao userDao;
 
     private User user;
@@ -21,8 +19,6 @@ public class UserDaoTest {
     void setFields() {
         userDao = UserDao.getINSTANCE();
         user = new User("testUser1", "testUser");
-        poolAdapter = new ConnectionPoolAdapter();
-        poolAdapter.init();
     }
 
     @Test
@@ -63,11 +59,6 @@ public class UserDaoTest {
     @AfterEach
     void removeUser() {
         userDao.delete(user.getId());
-    }
-
-    @AfterAll
-    void closeConnection() {
-        poolAdapter.terminate();
     }
 
     void saveWithoutException(User user) {
